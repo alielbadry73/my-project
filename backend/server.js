@@ -49,8 +49,13 @@ const upload = multer({
     }
 });
 
-// Middleware
-app.use(cors());
+// Middleware - Explicit CORS configuration
+app.use(cors({
+    origin: ['https://my-project12345.netlify.app', 'http://localhost:3000', 'https://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
