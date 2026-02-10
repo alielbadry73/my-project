@@ -327,16 +327,23 @@ db.serialize(() => {
         FOREIGN KEY (teacher_id) REFERENCES users(id)
     )`);
 
-    // Submissions table
-    db.run(`CREATE TABLE IF NOT EXISTS submissions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        assignment_id INTEGER,
-        student_id INTEGER,
-        content TEXT,
-        submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        grade TEXT,
-        feedback TEXT
-    )`);
+    // Submissions table - drop and recreate to fix schema issues
+    db.run(`DROP TABLE IF EXISTS submissions`, (err) => {
+        if (err) console.error('Error dropping submissions table:', err);
+        
+        db.run(`CREATE TABLE submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            assignment_id INTEGER,
+            student_id INTEGER,
+            content TEXT,
+            submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            grade TEXT,
+            feedback TEXT
+        )`, (err) => {
+            if (err) console.error('Error creating submissions table:', err);
+            else console.log('✅ Submissions table created successfully');
+        });
+    });
 
     // Orders table
     db.run(`CREATE TABLE IF NOT EXISTS orders (
