@@ -1,4 +1,61 @@
 // API Integration for IG Way Frontend
+
+// Toast notification function (backup if not defined globally)
+if (typeof showToast === 'undefined') {
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+        
+        const toastId = 'toast-' + Date.now();
+        
+        let icon = 'material-symbols:info';
+        let title = 'Notification';
+        let bgClass = 'bg-primary';
+        
+        if (type === 'warning') {
+            icon = 'material-symbols:warning';
+            title = 'Warning!';
+            bgClass = 'bg-warning';
+        } else if (type === 'success') {
+            icon = 'material-symbols:check-circle';
+            title = 'Success!';
+            bgClass = 'bg-success';
+        } else if (type === 'error') {
+            icon = 'material-symbols:error';
+            title = 'Error!';
+            bgClass = 'bg-danger';
+        }
+        
+        const toastHTML = `
+            <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header ${bgClass} text-white">
+                    <iconify-icon icon="${icon}" class="me-2"></iconify-icon>
+                    <strong class="me-auto">${title}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        
+        const toastElement = document.getElementById(toastId);
+        if (toastElement && window.bootstrap) {
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 3000
+            });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastElement.remove();
+            });
+        }
+    }
+}
+
 class IGWayAPI {
     constructor() {
         // Use configuration from config.js, fallback to localhost if config not loaded
