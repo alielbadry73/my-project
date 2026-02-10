@@ -2452,6 +2452,68 @@
         window.validateMiddleEastPhone = validateMiddleEastPhone;
         window.togglePasswordIconVisibility = togglePasswordIconVisibility;
         window.showToast = showToast;
+        
+        // Enroll in course function
+        function enrollInCourse(courseId) {
+            console.log('🎓 Enroll Now clicked for:', courseId);
+            console.log('🔍 Checking login status...');
+            
+            const isLoggedIn = localStorage.getItem('userLoggedIn');
+            
+            if (isLoggedIn) {
+                // User is logged in, proceed to checkout
+                console.log('✅ User is logged in, proceeding to checkout...');
+                
+                // Add course to cart and show checkout
+                if (window.cart && window.cart.addToCart) {
+                    window.cart.addToCart(courseId);
+                    
+                    // Show checkout modal
+                    setTimeout(() => {
+                        const checkoutModal = document.getElementById('checkoutModal');
+                        if (checkoutModal) {
+                            const modal = new bootstrap.Modal(checkoutModal);
+                            modal.show();
+                        }
+                    }, 500);
+                } else {
+                    // Fallback cart functionality
+                    console.log('🛒 Adding to cart with fallback...');
+                    showToast('Course added to cart! Redirecting to checkout...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = '#checkout';
+                    }, 1000);
+                }
+            } else {
+                // User is not logged in, show login modal
+                console.log('❌ User not logged in, showing login modal...');
+                
+                // Store pending action for after login
+                localStorage.setItem('pendingAction', JSON.stringify({
+                    action: 'enrollInCourse',
+                    courseId: courseId,
+                    timestamp: Date.now()
+                }));
+                
+                // Show login modal
+                const loginModal = document.getElementById('loginModal');
+                if (loginModal) {
+                    const modal = new bootstrap.Modal(loginModal);
+                    modal.show();
+                    showToast('Please login to enroll in this course', 'info');
+                } else {
+                    // Fallback: redirect to login page
+                    showToast('Please login to enroll in this course', 'info');
+                    setTimeout(() => {
+                        window.location.href = '#login';
+                    }, 1000);
+                }
+            }
+        }
+        
+        // Make enrollInCourse globally available
+        window.enrollInCourse = enrollInCourse;
 
         console.log('✅ ALL FUNCTIONS DEFINED IMMEDIATELY - READY FOR USE');
         console.log('🔄 AGGRESSIVE CACHE BUST - Version: ' + Date.now() + ' - FORCE UPDATE NOW');
