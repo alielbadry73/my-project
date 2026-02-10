@@ -125,13 +125,65 @@ class CartManager {
         console.log('🛒 Item type:', typeof item);
         console.log('🛒 Item keys:', item ? Object.keys(item) : 'null');
         
-        // Validate item is an object
+        // Handle string input (course ID)
         if (typeof item === 'string') {
-            console.error('❌ Cannot add string to cart. Item must be an object:', item);
-            this.showToast('Invalid item format. Please try again.', 'error');
-            return false;
+            console.log('🔄 Converting string to course object for:', item);
+            
+            // Course data mapping
+            const courseData = {
+                english: {
+                    id: 'english',
+                    title: 'IGCSE English Language',
+                    price: 249.99,
+                    instructor: 'Dr. Emily Rodriguez',
+                    board: 'Cambridge Board',
+                    duration: '8 weeks',
+                    image: '/images/courses/english.jpg',
+                    description: 'Master English language skills with comprehensive coverage of reading, writing, speaking, and listening for IGCSE success.'
+                },
+                mathematics: {
+                    id: 'mathematics',
+                    title: 'IGCSE Mathematics (Extended)',
+                    price: 299.99,
+                    instructor: 'Dr. Sarah Mitchell',
+                    board: 'Cambridge Board',
+                    duration: '10 weeks',
+                    image: '/images/courses/mathematics.jpg',
+                    description: 'Master advanced mathematical concepts with comprehensive coverage of IGCSE Extended Mathematics curriculum.'
+                },
+                physics: {
+                    id: 'physics',
+                    title: 'IGCSE Physics (Extended)',
+                    price: 299.99,
+                    instructor: 'Prof. Michael Chen',
+                    board: 'Edexcel Board',
+                    duration: '10 weeks',
+                    image: '/images/courses/physics.jpg',
+                    description: 'Master fundamental physics concepts with comprehensive coverage of IGCSE Extended Physics curriculum including mechanics, waves, and electricity.'
+                },
+                chemistry: {
+                    id: 'chemistry',
+                    title: 'IGCSE Chemistry (Extended)',
+                    price: 299.99,
+                    instructor: 'Dr. James Anderson',
+                    board: 'Cambridge Board',
+                    duration: '10 weeks',
+                    image: '/images/courses/chemistry.jpg',
+                    description: 'Master chemistry concepts with comprehensive coverage of IGCSE Extended Chemistry curriculum including organic, inorganic, and physical chemistry.'
+                }
+            };
+            
+            if (courseData[item]) {
+                item = courseData[item];
+                console.log('✅ Converted to course object:', item);
+            } else {
+                console.error('❌ Course not found:', item);
+                this.showToast('Course not found. Please try again.', 'error');
+                return false;
+            }
         }
         
+        // Validate item is an object
         if (!item || typeof item !== 'object') {
             console.error('❌ Invalid item format:', item);
             this.showToast('Invalid item format. Please try again.', 'error');

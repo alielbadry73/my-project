@@ -2195,6 +2195,76 @@
             }
         }
 
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('🚨 Global JavaScript Error:', {
+                message: e.message,
+                filename: e.filename,
+                lineno: e.lineno,
+                colno: e.colno,
+                error: e.error
+            });
+        });
+
+        // Global unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('🚨 Unhandled Promise Rejection:', e.reason);
+        });
+
+        // Comprehensive debugging
+        console.log('✅ Missing functions defined at startup');
+        console.log('🔍 Starting comprehensive system check...');
+
+        // Check all required elements
+        function checkRequiredElements() {
+            const requiredElements = [
+                'firstName', 'lastName', 'email', 'password', 'phone',
+                'registerModal', 'loginModal', 'toastContainer'
+            ];
+            
+            const missing = [];
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (!element) {
+                    missing.push(id);
+                }
+            });
+            
+            if (missing.length > 0) {
+                console.warn('⚠️ Missing elements:', missing);
+            } else {
+                console.log('✅ All required elements found');
+            }
+        }
+
+        // Check all required functions
+        function checkRequiredFunctions() {
+            const requiredFunctions = [
+                'validateMiddleEastPhone', 'togglePasswordIconVisibility',
+                'showToast', 'handleRegisterClick', 'addToCart'
+            ];
+            
+            const missing = [];
+            requiredFunctions.forEach(funcName => {
+                if (typeof window[funcName] !== 'function') {
+                    missing.push(funcName);
+                }
+            });
+            
+            if (missing.length > 0) {
+                console.warn('⚠️ Missing functions:', missing);
+            } else {
+                console.log('✅ All required functions available');
+            }
+        }
+
+        // Run checks when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            checkRequiredElements();
+            checkRequiredFunctions();
+            console.log('🎯 System check complete');
+        });
+
         console.log('✅ Missing functions defined at startup');
 
         // When served from localhost, use local API to avoid CORS and match the running backend
