@@ -1,102 +1,20 @@
-/**
- * Unified Cart System for IG Nation Learning Platform
- * This file provides consistent cart functionality across all pages
- */
+// Cart Management System for IG Nation
 
-// Global cart management
 class CartManager {
     constructor() {
         this.cart = this.loadCart();
         this.favorites = this.loadFavorites();
-        this.init();
-    }
-
-    // Initialize cart system
-    init() {
-        // Validate and clean cart data
-        this.validateCart();
-        this.updateCartCount();
-        this.updateFavoritesModal();
-        this.setupEventListeners();
-    }
-    
-    // Validate and clean cart data
-    validateCart() {
-        if (!Array.isArray(this.cart)) {
-            console.warn('🛒 Cart is not an array, resetting to empty array');
-            this.cart = [];
-            this.saveCart();
-            return;
-        }
-        
-        // Remove any invalid items
-        const originalLength = this.cart.length;
-        this.cart = this.cart.filter(item => {
-            // Check if item is a string (invalid)
-            if (typeof item === 'string') {
-                console.warn('🛒 Removing string item from cart:', item);
-                return false;
-            }
-            
-            if (!item || typeof item !== 'object') {
-                console.warn('🛒 Removing invalid cart item (not an object):', item);
-                return false;
-            }
-            
-            // Check if item is an array (string converted to array)
-            if (Array.isArray(item)) {
-                console.warn('🛒 Removing array item from cart:', item);
-                return false;
-            }
-            
-            // Ensure required fields exist
-            if (!item.id && !item.courseId) {
-                console.warn('🛒 Removing cart item without ID:', item);
-                return false;
-            }
-            
-            // Ensure title exists
-            if (!item.title) {
-                console.warn('🛒 Removing cart item without title:', item);
-                return false;
-            }
-            
-            // Ensure quantity is valid
-            if (item.quantity && (typeof item.quantity !== 'number' || item.quantity <= 0)) {
-                console.warn('🛒 Fixing invalid quantity for item:', item);
-                item.quantity = 1;
-            }
-            
-            return true;
-        });
-        
-        if (this.cart.length !== originalLength) {
-            console.log(`🛒 Cleaned cart: removed ${originalLength - this.cart.length} invalid items`);
-            this.saveCart();
-        }
+        console.log('🛒 CartManager initialized');
+        console.log('🛒 Initial cart:', this.cart);
     }
 
     // Load cart from localStorage
     loadCart() {
         try {
-            const cartData = localStorage.getItem('cart');
-            const cart = cartData ? JSON.parse(cartData) : [];
-            console.log('🛒 Loading cart from localStorage:', cart);
-            console.log('🛒 Cart length:', cart.length);
-            return cart;
+            const savedCart = localStorage.getItem('cart');
+            return savedCart ? JSON.parse(savedCart) : [];
         } catch (error) {
             console.error('Error loading cart:', error);
-            return [];
-        }
-    }
-
-    // Load favorites from localStorage
-    loadFavorites() {
-        try {
-            const favoritesData = localStorage.getItem('favorites');
-            return favoritesData ? JSON.parse(favoritesData) : [];
-        } catch (error) {
-            console.error('Error loading favorites:', error);
             return [];
         }
     }
@@ -105,8 +23,20 @@ class CartManager {
     saveCart() {
         try {
             localStorage.setItem('cart', JSON.stringify(this.cart));
+            console.log('💾 Cart saved to localStorage');
         } catch (error) {
             console.error('Error saving cart:', error);
+        }
+    }
+
+    // Load favorites from localStorage
+    loadFavorites() {
+        try {
+            const savedFavorites = localStorage.getItem('favorites');
+            return savedFavorites ? JSON.parse(savedFavorites) : [];
+        } catch (error) {
+            console.error('Error loading favorites:', error);
+            return [];
         }
     }
 
@@ -114,6 +44,7 @@ class CartManager {
     saveFavorites() {
         try {
             localStorage.setItem('favorites', JSON.stringify(this.favorites));
+            console.log('💾 Favorites saved to localStorage');
         } catch (error) {
             console.error('Error saving favorites:', error);
         }
@@ -194,42 +125,42 @@ class CartManager {
         const itemId = item.id || item.courseId;
         if (!itemId) {
             console.error('❌ Item missing ID:', item);
-            this.showToast('Invalid item: missing ID', 'error');
+            this.showToast('Invalid item format. Missing required information', 'error');
             return false;
         }
         
-        // Check if item already exists in cart
+        // Check if item already in cart
         const existingItem = this.cart.find(cartItem => 
-            cartItem.courseId === itemId || cartItem.id === itemId
+            (cartItem.id === itemId || cartItem.courseId === itemId)
         );
-
+        
         if (existingItem) {
-            this.showToast('This item is already in your cart!', 'warning');
+            console.log('⚠️ Item already in cart:', item.title);
+            this.showToast('Course already in cart!', 'warning');
             return false;
         }
-
-        // Add to cart with proper structure
+        
+        // Add to cart with proper format
         const cartItem = {
             id: itemId,
             courseId: itemId,
-            type: item.type || 'course',
-            title: item.title || 'Unknown Course',
-            price: item.price || 0,
-            instructor: item.instructor,
-            board: item.board,
-            image: item.image,
-            description: item.description,
-            quantity: item.quantity || 1,
-            addedAt: new Date().toISOString()
+            title: item.title,
+            price: parseFloat(item.price) || 0,
+            quantity: 1,
+            type: 'course',
+            instructor: item.instructor || 'IG Nation',
+            duration: item.duration || '10 weeks',
+            image: item.image || '/default-course.jpg',
+            description: item.description || ''
         };
-
+        
         console.log('✅ Adding cart item:', cartItem);
         
         this.cart.push(cartItem);
         this.saveCart();
         this.updateCartCount();
         this.updateCartModal();
-        this.showToast('Item added to cart!', 'success');
+        this.showToast(`${item.title} added to cart!`, 'success');
         
         console.log('✅ Cart updated:', this.cart);
         return true;
@@ -246,22 +177,22 @@ class CartManager {
         this.showToast('Item removed from cart', 'info');
     }
 
-    // Update cart quantity
-    updateQuantity(itemId, quantity) {
-        const item = this.cart.find(cartItem => 
-            cartItem.courseId === itemId || cartItem.id === itemId
-        );
+    // Update quantity
+    updateQuantity(itemId, newQuantity) {
+        if (newQuantity < 1) return;
         
+        const item = this.cart.find(item => (item.id === itemId || item.courseId === itemId));
         if (item) {
-            if (quantity <= 0) {
-                this.removeFromCart(itemId);
-            } else {
-                item.quantity = quantity;
-                this.saveCart();
-                this.updateCartCount();
-                this.updateCartModal();
-            }
+            item.quantity = newQuantity;
+            this.saveCart();
+            this.updateCartCount();
+            this.updateCartModal();
         }
+    }
+
+    // Get cart total
+    getCartTotal() {
+        return this.cart.reduce((total, item) => total + ((item.price || 0) * (item.quantity || 1)), 0);
     }
 
     // Clear cart
@@ -295,6 +226,13 @@ class CartManager {
             badge.style.display = '';
         });
 
+        // Also update modal cart count
+        const cartModalCount = document.getElementById('cartModalCount');
+        if (cartModalCount) {
+            cartModalCount.textContent = cartCount;
+            console.log('  - Updated modal cart count:', cartCount);
+        }
+
         console.log('🛒 Cart count updated:', cartCount);
     }
 
@@ -304,22 +242,44 @@ class CartManager {
         this.cart = this.loadCart();
         
         const cartList = document.getElementById('cartList');
-        if (!cartList) return;
+        const cartModalCount = document.getElementById('cartModalCount');
+        
+        console.log('🛒 Updating cart modal:');
+        console.log('  - Cart items:', this.cart);
+        console.log('  - Cart length:', this.cart.length);
+        
+        // Update modal count first
+        if (cartModalCount) {
+            const cartCount = this.cart.reduce((total, item) => total + (item.quantity || 1), 0);
+            cartModalCount.textContent = cartCount;
+            console.log('  - Modal count updated to:', cartCount);
+        }
+        
+        if (!cartList) {
+            console.log('  - Cart list element not found');
+            return;
+        }
 
         if (this.cart.length === 0) {
+            console.log('  - Cart is empty, showing empty message');
             cartList.innerHTML = `
-                <div class="text-center text-muted py-4">
-                    <iconify-icon icon="material-symbols:shopping-cart-outline" class="fs-1 mb-3"></iconify-icon>
-                    <p>Your cart is empty. Start adding courses to your cart!</p>
+                <div class="text-center py-5">
+                    <iconify-icon icon="material-symbols:shopping-cart-outline" style="font-size: 4rem; color: #cbd5e1; margin-bottom: 1rem;"></iconify-icon>
+                    <h5 style="color: #64748b; margin-bottom: 1rem;">Your cart is empty</h5>
+                    <p style="color: #94a3b8; margin-bottom: 2rem;">Discover our amazing courses and start learning today!</p>
+                    <a href="courses.html" class="btn btn-primary" style="padding: 12px 30px; border-radius: 25px; font-weight: 600;">
+                        Browse Courses
+                    </a>
                 </div>
             `;
             return;
         }
 
+        console.log('  - Rendering cart items...');
         cartList.innerHTML = this.cart.map(item => `
             <div class="cart-item d-flex align-items-center mb-3 p-3 border rounded">
                 <div class="flex-shrink-0 me-3">
-                    <img src="${item.image || 'images/placeholder-course.jpg'}" 
+                    <img src="${item.image || 'https://via.placeholder.com/60x60'}" 
                          alt="${item.title}" 
                          class="rounded" 
                          style="width: 60px; height: 60px; object-fit: cover;">
@@ -328,214 +288,117 @@ class CartManager {
                     <h6 class="mb-1">${item.title}</h6>
                     <p class="text-muted mb-1 small">${item.description || ''}</p>
                     <div class="d-flex align-items-center justify-content-between">
-                        <span class="text-primary fw-bold">$${item.price || '0.00'}</span>
+                        <span class="text-primary fw-bold">$${(item.price || '0.00')}</span>
                         <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-sm btn-outline-secondary" 
-                                    onclick="cartManager.updateQuantity('${item.courseId || item.id}', ${(item.quantity || 1) - 1})">
-                                -
-                            </button>
-                            <span class="px-2">${item.quantity || 1}</span>
-                            <button class="btn btn-sm btn-outline-secondary" 
-                                    onclick="cartManager.updateQuantity('${item.courseId || item.id}', ${(item.quantity || 1) + 1})">
-                                +
+                            <button class="btn btn-sm btn-outline-secondary" onclick="window.cart.updateQuantity('${item.id || item.courseId}', ${Math.max(1, (item.quantity || 1) - 1)})">-</button>
+                            <span class="mx-2">${item.quantity || 1}</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="window.cart.updateQuantity('${item.id || item.courseId}', ${(item.quantity || 1) + 1})">+</button>
+                            <button class="btn btn-sm btn-danger" onclick="window.cart.removeFromCart('${item.id || item.courseId}')">
+                                <iconify-icon icon="material-symbols:delete"></iconify-icon>
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="flex-shrink-0 ms-3">
-                    <button class="btn btn-sm btn-outline-danger" 
-                            onclick="cartManager.removeFromCart('${item.courseId || item.id}')">
-                        <iconify-icon icon="material-symbols:delete"></iconify-icon>
-                    </button>
-                </div>
             </div>
         `).join('');
+
+        // Update total
+        const total = this.cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+        const totalElement = document.getElementById('cartTotal');
+        if (totalElement) {
+            totalElement.textContent = `$${total.toFixed(2)}`;
+        }
+
+        console.log('  - Cart modal updated with', this.cart.length, 'items, total:', total);
     }
 
-    // Toggle favorite
-    toggleFavorite(itemId) {
-        const index = this.favorites.indexOf(itemId);
-        if (index > -1) {
-            this.favorites.splice(index, 1);
-            this.showToast('Item removed from favorites', 'info');
-        } else {
-            this.favorites.push(itemId);
-            this.showToast('Item added to favorites!', 'success');
+    // Toast notification function
+    showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+        
+        const toastId = 'toast-' + Date.now();
+        
+        let icon = 'material-symbols:info';
+        let title = 'Notification';
+        let bgClass = 'bg-primary';
+        
+        if (type === 'warning') {
+            icon = 'material-symbols:warning';
+            title = 'Warning!';
+            bgClass = 'bg-warning';
+        } else if (type === 'success') {
+            icon = 'material-symbols:check-circle';
+            title = 'Success!';
+            bgClass = 'bg-success';
+        } else if (type === 'error') {
+            icon = 'material-symbols:error';
+            title = 'Error!';
+            bgClass = 'bg-danger';
         }
         
-        this.saveFavorites();
-        this.updateFavoritesModal();
-    }
-
-    // Update favorites modal
-    updateFavoritesModal() {
-        const favoritesList = document.getElementById('favoritesList');
-        if (!favoritesList) return;
-
-        if (this.favorites.length === 0) {
-            favoritesList.innerHTML = `
-                <div class="text-center text-muted py-4">
-                    <iconify-icon icon="material-symbols:favorite-outline" class="fs-1 mb-3"></iconify-icon>
-                    <p>No favorites yet. Start adding courses to your favorites!</p>
-                </div>
-            `;
-            return;
-        }
-
-        // This would need to be implemented based on your course data structure
-        favoritesList.innerHTML = `
-            <div class="text-center text-muted py-4">
-                <iconify-icon icon="material-symbols:favorite" class="fs-1 mb-3"></iconify-icon>
-                <p>${this.favorites.length} favorite(s) saved</p>
-            </div>
-        `;
-    }
-
-    // Setup event listeners
-    setupEventListeners() {
-        // Listen for storage changes (for cross-tab synchronization)
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'cart') {
-                this.cart = this.loadCart();
-                this.updateCartCount();
-                this.updateCartModal();
-            }
-            if (e.key === 'favorites') {
-                this.favorites = this.loadFavorites();
-                this.updateFavoritesModal();
-            }
-        });
-    }
-
-    // Show toast notification
-    showToast(message, type = 'info') {
-        // Create toast element if it doesn't exist
-        let toastContainer = document.getElementById('toastContainer');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.id = 'toastContainer';
-            toastContainer.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 9999;
-            `;
-            document.body.appendChild(toastContainer);
-        }
-
-        const toastId = 'toast-' + Date.now();
-        const bgClass = {
-            'success': 'bg-success',
-            'error': 'bg-danger',
-            'warning': 'bg-warning',
-            'info': 'bg-info'
-        }[type] || 'bg-info';
-
-        const icon = {
-            'success': 'material-symbols:check-circle',
-            'error': 'material-symbols:error',
-            'warning': 'material-symbols:warning',
-            'info': 'material-symbols:info'
-        }[type] || 'material-symbols:info';
-
-        const toast = document.createElement('div');
-        toast.id = toastId;
-        toast.className = `toast align-items-center text-white ${bgClass} border-0`;
-        toast.setAttribute('role', 'alert');
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body d-flex align-items-center">
+        const toastHTML = `
+            <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header ${bgClass} text-white">
                     <iconify-icon icon="${icon}" class="me-2"></iconify-icon>
+                    <strong class="me-auto">${title}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
                     ${message}
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-
-        toastContainer.appendChild(toast);
-
-        // Initialize and show toast
-        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-        bsToast.show();
-
-        // Remove toast element after it's hidden
-        toast.addEventListener('hidden.bs.toast', () => {
-            toast.remove();
-        });
-    }
-
-    // Get cart total
-    getCartTotal() {
-        return this.cart.reduce((total, item) => {
-            return total + ((item.price || 0) * (item.quantity || 1));
-        }, 0);
-    }
-
-    // Get cart count
-    getCartCount() {
-        return this.cart.reduce((total, item) => total + (item.quantity || 1), 0);
-    }
-    
-    // Reset cart completely (for debugging)
-    resetCart() {
-        console.log('🛒 Resetting cart completely...');
-        this.cart = [];
-        this.saveCart();
-        this.updateCartCount();
-        this.updateCartModal();
-        console.log('✅ Cart reset complete');
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        
+        const toastElement = document.getElementById(toastId);
+        if (toastElement && window.bootstrap) {
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: 3000
+            });
+            toast.show();
+            
+            toastElement.addEventListener('hidden.bs.toast', function() {
+                toastElement.remove();
+            });
+        }
     }
 }
 
-// Initialize cart manager when DOM is loaded
-let cartManager;
+// Initialize cart system
+window.cart = null;
+
 document.addEventListener('DOMContentLoaded', function() {
-    cartManager = new CartManager();
+    console.log('🛒 Initializing cart system...');
     
-    // Make cart manager globally available
-    window.cartManager = cartManager;
-    
-    // Legacy function support for existing code - ONLY if not already defined
-    if (!window.addToCart) {
-        window.addToCart = function(item) {
-            return cartManager.addToCart(item);
-        };
+    // Initialize cart manager
+    if (typeof CartManager !== 'undefined') {
+        window.cart = new CartManager();
+        console.log('✅ Cart system initialized');
+    } else {
+        console.error('❌ CartManager not found');
     }
-    
-    if (!window.updateCartCount) {
-        window.updateCartCount = function() {
-            cartManager.updateCartCount();
-        };
-    }
-    
-    if (!window.toggleFavorite) {
-        window.toggleFavorite = function(itemId) {
-            cartManager.toggleFavorite(itemId);
-        };
-    }
-    
-    if (!window.removeFromCart) {
-        window.removeFromCart = function(itemId) {
-            cartManager.removeFromCart(itemId);
-        };
-    }
-    
-    if (!window.clearCart) {
-        window.clearCart = function() {
-            cartManager.clearCart();
-        };
-    }
-    
-    if (!window.resetCart) {
-        window.resetCart = function() {
-            cartManager.resetCart();
-        };
-    }
-    
-    console.log('🛒 Cart system initialized');
 });
 
-// Export for module systems
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CartManager;
+// Global cart functions for backward compatibility
+function addToCart(item) {
+    if (window.cart && window.cart.addToCart) {
+        return window.cart.addToCart(item);
+    }
+    console.error('Cart system not available');
+    return false;
+}
+
+function updateCartCount() {
+    if (window.cart && window.cart.updateCartCount) {
+        window.cart.updateCartCount();
+    }
+}
+
+function updateCartModal() {
+    if (window.cart && window.cart.updateCartModal) {
+        window.cart.updateCartModal();
+    }
 }
