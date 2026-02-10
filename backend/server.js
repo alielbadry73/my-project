@@ -332,13 +332,23 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         assignment_id INTEGER,
         student_id INTEGER,
-        answers TEXT,
-        score INTEGER,
-        status TEXT DEFAULT 'submitted',
-        graded INTEGER DEFAULT 0,
+        content TEXT,
         submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (assignment_id) REFERENCES assignments(id),
-        FOREIGN KEY (student_id) REFERENCES users(id)
+        grade TEXT,
+        feedback TEXT
+    )`);
+
+    // Orders table
+    db.run(`CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id TEXT UNIQUE,
+        user_id INTEGER NOT NULL,
+        items TEXT NOT NULL,
+        total_amount REAL NOT NULL,
+        status TEXT DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )`);
 
     // Add sample data for testing
