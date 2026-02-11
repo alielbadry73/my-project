@@ -2793,7 +2793,8 @@
         }
         
         // Check backend for active enrollments
-        const response = await fetch('/api/my-enrollments', {
+        const apiUrl = (window.API_CONFIG && window.API_CONFIG.apiURL) || 'http://localhost:8080/api';
+        const response = await fetch(`${apiUrl}/my-enrollments`, {
           headers: {
             'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json'
