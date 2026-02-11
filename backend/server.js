@@ -68,6 +68,11 @@ app.use(express.static(publicDir));
 
 // If a public file for the homepage exists, serve it
 app.get('/', (req, res) => {
+    // Force cache invalidation
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     const filePath = path.join(publicDir, 'index.html');
     if (require('fs').existsSync(filePath)) return res.sendFile(filePath);
     // fallback to repo root version
