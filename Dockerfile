@@ -4,14 +4,24 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copy backend package files
+COPY backend/package*.json ./backend/
 
 # Install dependencies
-RUN npm ci --only=production
+RUN cd backend && npm ci --only=production
 
-# Copy application code
-COPY . .
+# Copy backend application code
+COPY backend/ ./backend/
+
+# Copy frontend files
+COPY index.html ./
+COPY js/ ./js/
+COPY css/ ./css/
+COPY images/ ./images/
+COPY icomoon/ ./icomoon/
+COPY admin-panel*.html ./
+COPY courses.html ./
+COPY frontend_index.html ./
 
 # Create data directory for persistent storage
 RUN mkdir -p /data
@@ -29,5 +39,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+# Start application
+CMD ["node", "backend/server.js"]
