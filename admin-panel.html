@@ -1590,14 +1590,6 @@
             }
         }
         
-                
-                                        
-                showToast('Course access granted successfully!', 'success');
-                
-                // Refresh the modal data
-                loadStudentEnrollments(userId);
-                
-            } catch (error) {
                 console.error('Error granting access:', error);
                 showToast('Error granting access: ' + error.message, 'error');
             }
