@@ -329,7 +329,7 @@ class IGWayAPI {
         }
 
         try {
-            const response = await fetch(`${this.baseURL}/api/orders/by-email/${encodeURIComponent(email)}`);
+            const response = await fetch(`${this.baseURL}/orders/by-email/${encodeURIComponent(email)}`);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch orders by email');
