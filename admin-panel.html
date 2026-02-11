@@ -1247,7 +1247,8 @@
 
         async function apiCall(endpoint, options = {}) {
             // Build full URL when a relative path is provided
-            const url = endpoint.startsWith('http') ? endpoint : `${window.location.origin}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+            const baseUrl = 'https://my-project-gphv.onrender.com';
+            const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
             // Merge headers: preserve any custom headers, but always include Content-Type and Authorization when available
             const headers = Object.assign({}, {
