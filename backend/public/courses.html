@@ -2178,10 +2178,10 @@
       const existingItem = cart.find(item => item.courseId === courseId);
       
       if (existingItem) {
-        // Course already in cart - don't add again
-        if (!silent) showToast('This course is already in your cart!', 'info');
-        return false;
-      } else {
+            console.log('🛒 Item already in cart, updating quantity');
+            existingItem.quantity = (existingItem.quantity || 0) + 1;
+            if (!silent) showToast('Course quantity updated in cart', 'info');
+        } else {
         // Add course to cart (quantity is always 1 for courses)
         cart.push({
           courseId: courseId,
