@@ -1977,14 +1977,14 @@
                     '</td>' +
                     '</tr>'
                 ).join('');
-                document.getElementById(" enrollmentsTable\).innerHTML = tableHtml;
- } catch (error) {
- console.error(\Error loading enrollments:\, error);
- document.getElementById(\enrollmentsTable\).innerHTML = \<tr><td colspan=\\\5\\\ class=\\\text-center text-danger\\\>Error loading enrollments</td></tr>\;
- }
- }
+                document.getElementById("enrollmentsTable").innerHTML = tableHtml;
+            } catch (error) {
+                console.error('Error loading enrollments:', error);
+                document.getElementById('enrollmentsTable').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error loading enrollments</td></tr>';
+            }
+        }
 
- // ========== END OF ADMIN PANEL FUNCTIONS ==========
- </script>
+        // ========== END OF ADMIN PANEL FUNCTIONS ==========
+    </script>
 </body>
 </html>
