@@ -1,17 +1,17 @@
-# fly.toml app configuration file generated for ig-nation-app on 2026-02-11T18:17:55Z
+# fly.toml app configuration file generated for ig-nation-app-restless-silence-8983 on 2026-02-11T18:21:17Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'ig-nation-app'
+app = 'ig-nation-app-restless-silence-8983'
 primary_region = 'iad'
 
 [build]
 
 [env]
+  FRONTEND_URL = 'https://ig-nation-app.fly.dev'
   NODE_ENV = 'production'
   PORT = '8080'
-  FRONTEND_URL = 'https://ig-nation-app.fly.dev'
 
 [http_service]
   internal_port = 8080

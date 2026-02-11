@@ -2219,7 +2219,7 @@
     }
 
     // Enroll in course function - redirects to checkout
-    function enrollInCourse(courseId) {
+    async function enrollInCourse(courseId) {
       console.log('🚀 enrollInCourse called with courseId:', courseId);
       
       const isLoggedIn = localStorage.getItem('userLoggedIn');
