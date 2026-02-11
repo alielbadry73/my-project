@@ -2665,11 +2665,30 @@ app.get('/api/parent/dashboard', authenticateJWT, (req, res) => {
 
 // Default route is handled above
 
+// Create default admin if not exists
+db.get("SELECT * FROM users WHERE email = 'admin@ignation.com'", (err, admin) => {
+    if (!err && !admin) {
+        const bcrypt = require('bcryptjs');
+        const hashedPassword = bcrypt.hashSync('admin123', 12);
+        
+        db.run(`INSERT INTO users (email, password, first_name, last_name, role, created_at) 
+                VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+            ['admin@ignation.com', hashedPassword, 'Admin', 'User', 'admin'],
+            (err) => {
+                if (!err) {
+                    console.log('✅ Default admin account created: admin@ignation.com / admin123');
+                }
+            });
+    }
+});
+
+// Start server function
 function startServer() {
+    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
         console.log(`🚀 IG Nation Backend Server running at http://localhost:${PORT}/`);
-        console.log(`📁 Serving static files from: ${path.join(__dirname, '..')}`);
-        console.log(`🗄️  Database: ${path.join(__dirname, 'database.sqlite')}`);
+        console.log(`📁 Serving static files from: ${publicDir}`);
+        console.log(`🗄️  Database: ${dbPath}`);
     });
 }
 
